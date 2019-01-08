@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Colso.Xrm.DataTransporter.Properties {
+namespace Colso.Xrm.WebResourceAutoUpdater.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Colso.Xrm.DataTransporter.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Colso.Xrm.DataTransporter.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Colso.Xrm.WebResourceAutoUpdater.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -57,16 +57,6 @@ namespace Colso.Xrm.DataTransporter.Properties {
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap entities {
-            get {
-                object obj = ResourceManager.GetObject("entities", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -96,16 +86,6 @@ namespace Colso.Xrm.DataTransporter.Properties {
         public static System.Drawing.Bitmap preview {
             get {
                 object obj = ResourceManager.GetObject("preview", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap relation {
-            get {
-                object obj = ResourceManager.GetObject("relation", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

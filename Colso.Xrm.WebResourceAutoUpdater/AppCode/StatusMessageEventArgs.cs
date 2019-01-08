@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Colso.DataTransporter.AppCode
+namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 {
     public class StatusMessageEventArgs : EventArgs
     {
@@ -9,6 +13,11 @@ namespace Colso.DataTransporter.AppCode
         public StatusMessageEventArgs(string message)
         {
             Message = message;
+        }
+
+        public StatusMessageEventArgs(string message, params object[] args)
+        {
+            Message = string.Format(message, args);
         }
     }
 }

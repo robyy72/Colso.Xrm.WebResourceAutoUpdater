@@ -118,6 +118,7 @@
     <Reference Include="System.Runtime, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.4.1.0\lib\net462\System.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.Extensions.4.1.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
     </Reference>
@@ -174,47 +175,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AppCode\RelationRecord.cs" />
-    <Compile Include="AppCode\EntityRecord.cs" />
-    <Compile Include="Forms\Preview.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Preview.Designer.cs">
-      <DependentUpon>Preview.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Models\Item.cs" />
-    <Compile Include="AppCode\ListViewItemComparer.cs" />
-    <Compile Include="Models\Mapping.cs" />
-    <Compile Include="AppCode\MetadataHelper.cs" />
-    <Compile Include="AppCode\CrmExceptionHelper.cs" />
-    <Compile Include="AppCode\ProgressEventArgs.cs" />
-    <Compile Include="AppCode\SettingFileHandler.cs" />
+    <Compile Include="AppCode\FastExpiringCache.cs" />
+    <Compile Include="AppCode\MonitorChanges.cs" />
     <Compile Include="AppCode\StatusMessageEventArgs.cs" />
-    <Compile Include="DataTransporter.cs">
+    <Compile Include="AppCode\ResourceUpdater.cs" />
+    <Compile Include="AutoUpdater.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DataTransporter.designer.cs">
-      <DependentUpon>DataTransporter.cs</DependentUpon>
+    <Compile Include="AutoUpdater.designer.cs">
+      <DependentUpon>AutoUpdater.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MappingList.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MappingList.Designer.cs">
-      <DependentUpon>MappingList.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\FilterEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FilterEditor.Designer.cs">
-      <DependentUpon>FilterEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ErrorList.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ErrorList.Designer.cs">
-      <DependentUpon>ErrorList.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Models\RecordStateAndStatus.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -224,20 +194,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DataTransporter.resx">
-      <DependentUpon>DataTransporter.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Preview.resx">
-      <DependentUpon>Preview.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MappingList.resx">
-      <DependentUpon>MappingList.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FilterEditor.resx">
-      <DependentUpon>FilterEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ErrorList.resx">
-      <DependentUpon>ErrorList.cs</DependentUpon>
+    <EmbeddedResource Include="AutoUpdater.resx">
+      <DependentUpon>AutoUpdater.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
@@ -252,8 +210,6 @@
     <Content Include="LICENSE.txt" />
     <Content Include="Resources\paypal.png" />
     <Content Include="Resources\preview.png" />
-    <Content Include="Resources\relation.gif" />
-    <None Include="Resources\entities.gif" />
     <None Include="Resources\export.png" />
   </ItemGroup>
   <ItemGroup />
@@ -264,7 +220,7 @@
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.YearStamp.MonthStamp.DayStamp" BuildVersion_ConfigurationName="Release" />
+      <UserProperties BuildVersion_ConfigurationName="Release" BuildVersion_BuildVersioningStyle="None.YearStamp.MonthStamp.DayStamp" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
