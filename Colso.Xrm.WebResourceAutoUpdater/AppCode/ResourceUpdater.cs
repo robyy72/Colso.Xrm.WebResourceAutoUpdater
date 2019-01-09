@@ -14,66 +14,60 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 {
     public static class ResourceUpdater
     {
-        public static Guid[] Upload(this IOrganizationService service, string basefolder, string[] files)
+        public static Guid Upload(this IOrganizationService service, string basefolder, string f)
         {
-            var pubResourceList = new List<Guid>();
+            var name = string.Concat(f.Replace(basefolder, string.Empty));
+            name = name.Trim('\\').Replace("\\", "/");
 
-            foreach (var f in files.OrderBy(f => f))
+            var q = new QueryExpression("webresource");
+            q.ColumnSet = new ColumnSet("name");
+            q.Criteria.AddCondition("name", ConditionOperator.Equal, name);
+
+            var wr = service.RetrieveMultiple(q).Entities.FirstOrDefault();
+
+            if (wr != null)
             {
-                var name = string.Concat(f.Replace(basefolder, string.Empty));
-                name = name.Trim('\\').Replace("\\", "/");
+                wr["content"] = Convert.ToBase64String(File.ReadAllBytes(f));
+                service.Update(wr);
 
-                var q = new QueryExpression("webresource");
-                q.ColumnSet = new ColumnSet("name");
-                q.Criteria.AddCondition("name", ConditionOperator.Equal, name);
-
-                var wr = service.RetrieveMultiple(q).Entities.FirstOrDefault();
-
-                if (wr != null)
-                {
-                    wr["content"] = Convert.ToBase64String(File.ReadAllBytes(f));
-                    service.Update(wr);
-                    pubResourceList.Add(wr.Id);
-                }
-                else
-                {
-                    // IF NOT EXISTS CREATE?
-                    var wrNew = new Entity("webresource");
-                    wrNew["name"] = name;
-                    wrNew["content"] = Convert.ToBase64String(File.ReadAllBytes(f));
-
-                    var wrType = new OptionSetValue();
-
-                    switch (Path.GetExtension(f).ToLower())
-                    {
-                        case ".js":
-                            wrType.Value = 3;
-                            break;
-                        case ".png":
-                        case ".jpg":
-                        case ".ico":
-                        case ".gif":
-                        case ".jpeg":
-                            wrType.Value = 5;
-                            break;
-                        case ".html":
-                        case ".htm":
-                            wrType.Value = 1;
-                            break;
-                        case ".xap":
-                            wrType.Value = 8;
-                            break;
-                        default:
-                            wrType.Value = 2;
-                            break;
-                    }
-                    wrNew["webresourcetype"] = wrType;
-
-                    pubResourceList.Add(service.Create(wrNew));
-                }
+                return wr.Id;
             }
+            else
+            {
+                // IF NOT EXISTS CREATE?
+                var wrNew = new Entity("webresource");
+                wrNew["name"] = name;
+                wrNew["content"] = Convert.ToBase64String(File.ReadAllBytes(f));
 
-            return pubResourceList.ToArray();
+                var wrType = new OptionSetValue();
+
+                switch (Path.GetExtension(f).ToLower())
+                {
+                    case ".js":
+                        wrType.Value = 3;
+                        break;
+                    case ".png":
+                    case ".jpg":
+                    case ".ico":
+                    case ".gif":
+                    case ".jpeg":
+                        wrType.Value = 5;
+                        break;
+                    case ".html":
+                    case ".htm":
+                        wrType.Value = 1;
+                        break;
+                    case ".xap":
+                        wrType.Value = 8;
+                        break;
+                    default:
+                        wrType.Value = 2;
+                        break;
+                }
+                wrNew["webresourcetype"] = wrType;
+
+                return service.Create(wrNew);
+            }
         }
 
         public static void Publish(this IOrganizationService service, Guid[] resourceIds)

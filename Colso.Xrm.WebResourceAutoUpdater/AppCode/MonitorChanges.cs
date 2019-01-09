@@ -89,8 +89,17 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                 var filenames = (HashSet<string>)args.CacheItem.Value;
 
                 SetStatusMessage("Start upload of {0} file{1}", filenames.Count, filenames.Count == 1 ? string.Empty : "s");
-                var ids = _service.Upload(_folder, filenames.ToArray());
-                _resourceIds.AddRange(ids);
+                foreach (var f in filenames.ToArray().OrderBy(f => f))
+                {
+                    try
+                    {
+                        _resourceIds.Add(_service.Upload(_folder, f));
+                    }
+                    catch (Exception ex)
+                    {
+                        SetStatusMessage("FAILED! {0}", ex);
+                    }
+                }
 
                 // Only publish when no more files are being uploaded
                 _activeUploads--;
