@@ -33,9 +33,9 @@
             this.viewImageList = new System.Windows.Forms.ImageList(this.components);
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.gbSettings = new System.Windows.Forms.GroupBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.dlSolutions = new System.Windows.Forms.ComboBox();
             this.txtFilter = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.lblExtensionFilter = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.gbEnvironment = new System.Windows.Forms.GroupBox();
             this.btnBrowse = new System.Windows.Forms.Button();
@@ -55,12 +55,15 @@
             this.gbLog = new System.Windows.Forms.GroupBox();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.pnlBody = new System.Windows.Forms.Panel();
+            this.lblDelay = new System.Windows.Forms.Label();
+            this.txtDelay = new System.Windows.Forms.NumericUpDown();
             this.pnlHeader.SuspendLayout();
             this.gbSettings.SuspendLayout();
             this.gbEnvironment.SuspendLayout();
             this.tsMain.SuspendLayout();
             this.gbLog.SuspendLayout();
             this.pnlBody.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).BeginInit();
             this.SuspendLayout();
             // 
             // viewImageList
@@ -77,30 +80,33 @@
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlHeader.Location = new System.Drawing.Point(0, 25);
             this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(800, 85);
+            this.pnlHeader.Size = new System.Drawing.Size(800, 104);
             this.pnlHeader.TabIndex = 103;
             // 
             // gbSettings
             // 
             this.gbSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbSettings.Controls.Add(this.comboBox1);
+            this.gbSettings.Controls.Add(this.txtDelay);
+            this.gbSettings.Controls.Add(this.lblDelay);
+            this.gbSettings.Controls.Add(this.dlSolutions);
             this.gbSettings.Controls.Add(this.txtFilter);
-            this.gbSettings.Controls.Add(this.label2);
+            this.gbSettings.Controls.Add(this.lblExtensionFilter);
             this.gbSettings.Controls.Add(this.label1);
             this.gbSettings.Location = new System.Drawing.Point(516, 3);
             this.gbSettings.Name = "gbSettings";
-            this.gbSettings.Size = new System.Drawing.Size(281, 72);
+            this.gbSettings.Size = new System.Drawing.Size(281, 95);
             this.gbSettings.TabIndex = 102;
             this.gbSettings.TabStop = false;
             this.gbSettings.Text = "Settings";
             // 
-            // comboBox1
+            // dlSolutions
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(104, 22);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(171, 21);
-            this.comboBox1.TabIndex = 106;
+            this.dlSolutions.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.dlSolutions.FormattingEnabled = true;
+            this.dlSolutions.Location = new System.Drawing.Point(104, 22);
+            this.dlSolutions.Name = "dlSolutions";
+            this.dlSolutions.Size = new System.Drawing.Size(171, 21);
+            this.dlSolutions.TabIndex = 106;
             // 
             // txtFilter
             // 
@@ -111,14 +117,14 @@
             this.txtFilter.Size = new System.Drawing.Size(171, 20);
             this.txtFilter.TabIndex = 105;
             // 
-            // label2
+            // lblExtensionFilter
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 48);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(42, 13);
-            this.label2.TabIndex = 102;
-            this.label2.Text = "Filefilter";
+            this.lblExtensionFilter.AutoSize = true;
+            this.lblExtensionFilter.Location = new System.Drawing.Point(6, 48);
+            this.lblExtensionFilter.Name = "lblExtensionFilter";
+            this.lblExtensionFilter.Size = new System.Drawing.Size(75, 13);
+            this.lblExtensionFilter.TabIndex = 102;
+            this.lblExtensionFilter.Text = "Extension filter";
             // 
             // label1
             // 
@@ -140,7 +146,7 @@
             this.gbEnvironment.Controls.Add(this.lblOrganisation);
             this.gbEnvironment.Location = new System.Drawing.Point(3, 4);
             this.gbEnvironment.Name = "gbEnvironment";
-            this.gbEnvironment.Size = new System.Drawing.Size(507, 71);
+            this.gbEnvironment.Size = new System.Drawing.Size(507, 94);
             this.gbEnvironment.TabIndex = 101;
             this.gbEnvironment.TabStop = false;
             this.gbEnvironment.Text = "Environment";
@@ -281,7 +287,7 @@
             this.gbLog.Controls.Add(this.txtLog);
             this.gbLog.Location = new System.Drawing.Point(3, 6);
             this.gbLog.Name = "gbLog";
-            this.gbLog.Size = new System.Drawing.Size(794, 319);
+            this.gbLog.Size = new System.Drawing.Size(794, 300);
             this.gbLog.TabIndex = 102;
             this.gbLog.TabStop = false;
             this.gbLog.Text = "Log";
@@ -294,17 +300,45 @@
             this.txtLog.Location = new System.Drawing.Point(9, 19);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
-            this.txtLog.Size = new System.Drawing.Size(779, 294);
+            this.txtLog.Size = new System.Drawing.Size(779, 275);
             this.txtLog.TabIndex = 0;
             // 
             // pnlBody
             // 
             this.pnlBody.Controls.Add(this.gbLog);
             this.pnlBody.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlBody.Location = new System.Drawing.Point(0, 110);
+            this.pnlBody.Location = new System.Drawing.Point(0, 129);
             this.pnlBody.Name = "pnlBody";
-            this.pnlBody.Size = new System.Drawing.Size(800, 328);
+            this.pnlBody.Size = new System.Drawing.Size(800, 309);
             this.pnlBody.TabIndex = 104;
+            // 
+            // lblDelay
+            // 
+            this.lblDelay.AutoSize = true;
+            this.lblDelay.Location = new System.Drawing.Point(6, 70);
+            this.lblDelay.Name = "lblDelay";
+            this.lblDelay.Size = new System.Drawing.Size(91, 13);
+            this.lblDelay.TabIndex = 107;
+            this.lblDelay.Text = "Upload delay (ms)";
+            // 
+            // txtDelay
+            // 
+            this.txtDelay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDelay.Location = new System.Drawing.Point(104, 68);
+            this.txtDelay.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.txtDelay.Name = "txtDelay";
+            this.txtDelay.Size = new System.Drawing.Size(171, 20);
+            this.txtDelay.TabIndex = 108;
+            this.txtDelay.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
             // 
             // AutoUpdater
             // 
@@ -326,6 +360,7 @@
             this.gbLog.ResumeLayout(false);
             this.gbLog.PerformLayout();
             this.pnlBody.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -353,8 +388,10 @@
         private System.Windows.Forms.Button btnBrowse;
         private System.Windows.Forms.TextBox txtFolderPath;
         private System.Windows.Forms.TextBox txtFilter;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblExtensionFilter;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox dlSolutions;
+        private System.Windows.Forms.NumericUpDown txtDelay;
+        private System.Windows.Forms.Label lblDelay;
     }
 }

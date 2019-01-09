@@ -21,9 +21,10 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
             foreach (var f in files.OrderBy(f => f))
             {
                 var name = string.Concat(f.Replace(basefolder, string.Empty));
+                name = name.Trim('\\').Replace("\\", "/");
 
                 var q = new QueryExpression("webresource");
-                q.ColumnSet = new ColumnSet("name", "content");
+                q.ColumnSet = new ColumnSet("name");
                 q.Criteria.AddCondition("name", ConditionOperator.Equal, name);
 
                 var wr = service.RetrieveMultiple(q).Entities.FirstOrDefault();
@@ -90,6 +91,16 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                 var solutionAddReq = new AddSolutionComponentRequest() { ComponentId = id, ComponentType = 61, SolutionUniqueName = solutionUniqueName };
                 service.Execute(solutionAddReq);
             }
+        }
+        public static Entity[] GetUnmanagedSolutions(this IOrganizationService service)
+        {
+            var q = new QueryExpression("solution");
+            q.ColumnSet = new ColumnSet("friendlyname", "uniquename");
+            q.Criteria.AddCondition("ismanaged", ConditionOperator.Equal, false);
+
+            return service.RetrieveMultiple(q).Entities
+                .OrderBy(s => s.GetAttributeValue<string>("friendlyname"))
+                .ToArray();
         }
     }
 }

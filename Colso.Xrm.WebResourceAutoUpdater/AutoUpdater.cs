@@ -32,10 +32,18 @@ namespace Colso.Xrm.WebResourceAutoUpdater
         {
             InitializeComponent();
 
+            // Make sure to get the connection updates:
+            this.ConnectionUpdated += new XrmToolBox.Extensibility.PluginControlBase.ConnectionUpdatedHandler(this.AutoUpdater_ConnectionUpdated);
+
             monitor = new MonitorChanges();
             monitor.OnMonitorMessage += UpdateStatusMessage;
 
             // Set defauts
+            RestoreSettings();
+        }
+
+        private void RestoreSettings()
+        {
             string settingspath;
             SettingsManager.Instance.TryLoad<string>(this.GetType(), out settingspath, "folderpath");
             txtFolderPath.AppendText(settingspath);
@@ -43,6 +51,10 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             string settingsfilter;
             SettingsManager.Instance.TryLoad<string>(this.GetType(), out settingsfilter, "filefilter");
             txtFilter.AppendText(settingsfilter);
+
+            decimal? uploaddelay;
+            SettingsManager.Instance.TryLoad<decimal?>(this.GetType(), out uploaddelay, "uploaddelay");
+            if (uploaddelay != null && uploaddelay.HasValue) txtDelay.Value = uploaddelay.Value;
         }
 
         #region XrmToolbox
@@ -132,14 +144,63 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             ManageWorkingState(false);
 
             SetConnectionLabel(e.ConnectionDetail.ConnectionName);
+            LoadSolutions();
         }
 
         private void tsbCloseThisTab_Click(object sender, EventArgs e)
         {
+            monitor.Stop();
             CloseTool();
         }
 
         private void tsbExecute_Click(object sender, EventArgs e)
+        {
+            ToggleMonitor();
+        }
+
+        private void donateInUSDToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenDonationPage("USD");
+        }
+
+        private void donateInEURToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenDonationPage("EUR");
+        }
+
+        private void donateInGBPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenDonationPage("GBP");
+        }
+
+        #endregion Form events
+
+        #region Methods
+
+        private void LoadSolutions()
+        {
+            var worker = new BackgroundWorker();
+            worker.DoWork += (sender, e) =>
+            {
+                if (!dlSolutions.InvokeRequired) dlSolutions.Items.Clear();
+                else dlSolutions.Invoke((MethodInvoker)(() => { dlSolutions.Items.Clear(); }));
+
+                var solutions = Service.GetUnmanagedSolutions();
+                var items = solutions
+                    .Select(s => new ComboboxItem() {
+                        Text = s.GetAttributeValue<string>("friendlyname"),
+                        Value = s.GetAttributeValue<string>("uniquename")
+                    })
+                    .ToArray();
+
+                if (!dlSolutions.InvokeRequired) dlSolutions.Items.AddRange(items);
+                else dlSolutions.Invoke((MethodInvoker)(() => { dlSolutions.Items.AddRange(items); }));
+            };
+
+            worker.RunWorkerAsync();
+        }
+
+        private void ToggleMonitor()
         {
             if (monitor.IsRunning())
             {
@@ -163,40 +224,17 @@ namespace Colso.Xrm.WebResourceAutoUpdater
                     return;
                 }
 
+                var selectedsolution = dlSolutions.SelectedItem == null ? null : (string)((ComboboxItem)dlSolutions.SelectedItem).Value;
                 var worker = new BackgroundWorker { WorkerReportsProgress = true };
                 worker.DoWork += (s, args) =>
                 {
                     ManageWorkingState(true);
-                    monitor.Start(this.Service, txtFolderPath.Text, txtFilter.Text);
+                    monitor.Start(this.Service, (int)txtDelay.Value, txtFolderPath.Text, selectedsolution, txtFilter.Text.Split(',',';'));
                 };
 
                 worker.RunWorkerAsync();
             }
         }
-
-        private void donateInUSDToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenDonationPage("USD");
-        }
-
-        private void donateInEURToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenDonationPage("EUR");
-        }
-
-        private void donateInGBPToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OpenDonationPage("GBP");
-        }
-
-        protected void DataTransporter_OnCloseTool(object sender, EventArgs e)
-        {
-            // First save settings file
-        }
-
-        #endregion Form events
-
-        #region Methods
 
         private void SetConnectionLabel(string name)
         {
@@ -208,12 +246,15 @@ namespace Colso.Xrm.WebResourceAutoUpdater
         {
             workingstate = working;
             txtFolderPath.Enabled = !working;
+            dlSolutions.Enabled = !working;
             txtFilter.Enabled = !working;
+            txtDelay.Enabled = !working;
             if (working)
             {
                 // Save settings
                 SettingsManager.Instance.Save(this.GetType(), txtFolderPath.Text, "folderpath");
                 SettingsManager.Instance.Save(this.GetType(), txtFilter.Text, "filefilter");
+                SettingsManager.Instance.Save(this.GetType(), txtDelay.Value, "uploaddelay");
             }
             tsbExecute.Text = working ? tsbExecute.Text.Replace("Start", "Stop") : tsbExecute.Text.Replace("Stop", "Start");
         }
@@ -236,9 +277,16 @@ namespace Colso.Xrm.WebResourceAutoUpdater
 
         private void UpdateStatusMessage(object sender, EventArgs e)
         {
-            var msg = string.Format("{0:HH:mm:ss.fff} - {1}", DateTime.Now, ((StatusMessageEventArgs)e).Message);
-            txtLog.AppendText(msg);
-            txtLog.AppendText(Environment.NewLine);
+            if (txtLog.InvokeRequired)
+            {
+                Invoke((MethodInvoker)(() => { UpdateStatusMessage(sender, e); }));
+            }
+            else
+            {
+                var msg = string.Format("{0:HH:mm:ss.fff} - {1}", DateTime.Now, ((StatusMessageEventArgs)e).Message);
+                txtLog.AppendText(msg);
+                txtLog.AppendText(Environment.NewLine);
+            }
         }
 
 
