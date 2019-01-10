@@ -22,7 +22,6 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
         private int _cacheTimeMilliseconds = 1000;
         static ManualResetEvent _quitEvent = new ManualResetEvent(false);
 
-        private int _activeUploads = 0;
         private List<Guid> _resourceIds = new List<Guid>();
         public event EventHandler OnMonitorMessage;
 
@@ -80,31 +79,34 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
         {
             if (args.RemovedReason != CacheEntryRemovedReason.Expired) return;
 
-            try
+            var updates = ((HashSet<string>)args.CacheItem.Value).ToArray();
+            var directories = updates
+                .Where(u => ((File.GetAttributes(u) & FileAttributes.Directory) == FileAttributes.Directory))
+                .ToArray();
+
+            // Get all files in the cache
+            var filenames = updates.Where(p => !directories.Any(p2 => p2 == p)).ToList();
+            filenames.AddRange(directories.SelectMany(d => Directory.GetFiles(d)));
+            filenames = filenames.Where(f => IsExtensionAllowed(f)).Distinct().ToList();
+
+            if (filenames.Count > 0)
             {
 
-                _activeUploads++;
-
-                // Get all files in the cache
-                var filenames = (HashSet<string>)args.CacheItem.Value;
-
-                SetStatusMessage("Start upload of {0} file{1}", filenames.Count, filenames.Count == 1 ? string.Empty : "s");
-                foreach (var f in filenames.ToArray().OrderBy(f => f))
+                try
                 {
-                    try
+                    SetStatusMessage("Start upload of {0} file{1}", filenames.Count, filenames.Count == 1 ? string.Empty : "s");
+                    foreach (var f in filenames)
                     {
-                        _resourceIds.Add(_service.Upload(_folder, f));
+                        try
+                        {
+                            _resourceIds.Add(_service.Upload(_folder, f));
+                        }
+                        catch (Exception ex)
+                        {
+                            SetStatusMessage("FAILED! {0}", ex);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        SetStatusMessage("FAILED! {0}", ex);
-                    }
-                }
 
-                // Only publish when no more files are being uploaded
-                _activeUploads--;
-                if (_activeUploads == 0)
-                {
                     var uids = _resourceIds.Distinct().ToArray();
                     _resourceIds.Clear();
                     SetStatusMessage("Start publish");
@@ -115,22 +117,24 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                     {
                         _service.AddToSolution(_solutionuniquename, uids);
                     }
-                }
 
-                SetStatusMessage("Done!");
-            }
-            catch (Exception ex)
-            {
-                SetStatusMessage("ERROR! {0}", ex);
+                    SetStatusMessage("Done!");
+                }
+                catch (Exception ex)
+                {
+                    SetStatusMessage("ERROR! {0}", ex);
+                }
             }
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            if (_allowedextensions == null || _allowedextensions.Count == 0 || 
-                _allowedextensions.Contains(Path.GetExtension(e.Name).TrimStart('.').ToLower()))
+            var attr = File.GetAttributes(e.FullPath);
+            var isdirectory = ((attr & FileAttributes.Directory) == FileAttributes.Directory);
+
+            if (isdirectory || IsExtensionAllowed(e.FullPath))
             {
-                HashSet<string> currentupdates = (HashSet<string>) _memCache.Get("fileupdates");
+                HashSet<string> currentupdates = (HashSet<string>)_memCache.Get("fileupdates");
                 if (currentupdates == null) currentupdates = new HashSet<string>();
 
                 // Only add if it is not there already (swallow others)
@@ -143,6 +147,12 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                 _cacheItemPolicy.AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(_cacheTimeMilliseconds);
                 _memCache.AddOrGetExisting("fileupdates", currentupdates, _cacheItemPolicy);
             }
+        }
+
+        private bool IsExtensionAllowed(string file)
+        {
+            return (_allowedextensions == null || _allowedextensions.Count == 0 ||
+                _allowedextensions.Contains(Path.GetExtension(file).TrimStart('.').ToLower()));
         }
 
         private void SetStatusMessage(string format, params object[] args)
