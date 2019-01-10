@@ -140,7 +140,7 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                 // Only add if it is not there already (swallow others)
                 if (!currentupdates.Contains(e.FullPath))
                 {
-                    SetStatusMessage("Changed file: {0}", e.Name);
+                    SetStatusMessage("Changed {1}: {0}", e.Name, isdirectory ? "directory": "file");
                     currentupdates.Add(e.FullPath);
                 }
 
