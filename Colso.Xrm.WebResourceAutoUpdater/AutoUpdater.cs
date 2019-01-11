@@ -44,17 +44,22 @@ namespace Colso.Xrm.WebResourceAutoUpdater
 
         private void RestoreSettings()
         {
-            string settingspath;
-            SettingsManager.Instance.TryLoad<string>(this.GetType(), out settingspath, "folderpath");
-            txtFolderPath.AppendText(settingspath);
+            SettingsManager mgr = SettingsManager.Instance;
 
-            string settingsfilter;
-            SettingsManager.Instance.TryLoad<string>(this.GetType(), out settingsfilter, "filefilter");
-            txtFilter.AppendText(settingsfilter);
+            if (mgr != null)
+            {
+                string settingspath;
+                mgr.TryLoad<string>(this.GetType(), out settingspath, "folderpath");
+                if (!string.IsNullOrEmpty(settingspath)) txtFolderPath.AppendText(settingspath);
 
-            decimal? uploaddelay;
-            SettingsManager.Instance.TryLoad<decimal?>(this.GetType(), out uploaddelay, "uploaddelay");
-            if (uploaddelay != null && uploaddelay.HasValue) txtDelay.Value = uploaddelay.Value;
+                string settingsfilter;
+                mgr.TryLoad<string>(this.GetType(), out settingsfilter, "filefilter");
+                if (!string.IsNullOrEmpty(settingsfilter)) txtFilter.AppendText(settingsfilter);
+
+                decimal? uploaddelay;
+                mgr.TryLoad<decimal?>(this.GetType(), out uploaddelay, "uploaddelay");
+                if (uploaddelay != null && uploaddelay.HasValue) txtDelay.Value = uploaddelay.Value;
+            }
         }
 
         #region XrmToolbox
