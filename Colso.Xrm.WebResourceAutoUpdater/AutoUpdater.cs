@@ -12,7 +12,7 @@ using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.Windows.Forms;
-using System.Xml;
+//using Windows.UI.Notifications;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Args;
 using XrmToolBox.Extensibility.Interfaces;
@@ -35,8 +35,8 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             // Make sure to get the connection updates:
             this.ConnectionUpdated += new XrmToolBox.Extensibility.PluginControlBase.ConnectionUpdatedHandler(this.AutoUpdater_ConnectionUpdated);
 
-            monitor = new MonitorChanges();
-            monitor.OnMonitorMessage += UpdateStatusMessage;
+            monitor = new MonitorChanges(dlSolutions, GetSelectedSolution, SendWindowsNotification);
+            monitor.OnMonitorMessage += UpdateLog;
 
             // Set defauts
             RestoreSettings();
@@ -152,6 +152,31 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             LoadSolutions();
         }
 
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                fbd.SelectedPath = txtFolderPath.Text; // set default path
+
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    txtFolderPath.Text = fbd.SelectedPath;
+                }
+            }
+        }
+
+        private void btnClearLog_Click(object sender, EventArgs e)
+        {
+            ClearLog(sender, e);
+        }
+
+        private void btnForceUpdate_Click(object sender, EventArgs e)
+        {
+            ForceUpdate();
+        }
+
         private void tsbCloseThisTab_Click(object sender, EventArgs e)
         {
             monitor.Stop();
@@ -229,16 +254,23 @@ namespace Colso.Xrm.WebResourceAutoUpdater
                     return;
                 }
 
-                var selectedsolution = dlSolutions.SelectedItem == null ? null : (string)((ComboboxItem)dlSolutions.SelectedItem).Value;
                 var worker = new BackgroundWorker { WorkerReportsProgress = true };
                 worker.DoWork += (s, args) =>
                 {
                     ManageWorkingState(true);
-                    monitor.Start(this.Service, (int)txtDelay.Value, txtFolderPath.Text, selectedsolution, txtFilter.Text.Split(',',';'));
+                    monitor.Start(this.Service, (int)txtDelay.Value, txtFolderPath.Text, txtFilter.Text.Split(',',';'));
                 };
 
                 worker.RunWorkerAsync();
             }
+        }
+
+        private void ForceUpdate()
+        {
+            var dir = txtFolderPath.Text;
+            var allfiles = Directory.GetFiles(dir, "*.*", SearchOption.AllDirectories);
+
+            monitor.UpdateFiles(allfiles.ToList<string>());
         }
 
         private void SetConnectionLabel(string name)
@@ -251,7 +283,6 @@ namespace Colso.Xrm.WebResourceAutoUpdater
         {
             workingstate = working;
             txtFolderPath.Enabled = !working;
-            dlSolutions.Enabled = !working;
             txtFilter.Enabled = !working;
             txtDelay.Enabled = !working;
             if (working)
@@ -280,11 +311,11 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             }
         }
 
-        private void UpdateStatusMessage(object sender, EventArgs e)
+        private void UpdateLog(object sender, EventArgs e)
         {
             if (txtLog.InvokeRequired)
             {
-                Invoke((MethodInvoker)(() => { UpdateStatusMessage(sender, e); }));
+                Invoke((MethodInvoker)(() => { UpdateLog(sender, e); }));
             }
             else
             {
@@ -294,6 +325,17 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             }
         }
 
+        private void ClearLog(object sender, EventArgs e)
+        {
+            if (txtLog.InvokeRequired)
+            {
+                Invoke((MethodInvoker)(() => { ClearLog(sender, e); }));
+            }
+            else
+            {
+                txtLog.Text = string.Empty;
+            }
+        }
 
         private void OpenDonationPage(string currency)
         {
@@ -301,21 +343,40 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             System.Diagnostics.Process.Start(url);
         }
 
-        private void btnBrowse_Click(object sender, EventArgs e)
+        private string GetSelectedSolution()
         {
-            using (var fbd = new FolderBrowserDialog())
-            {
-                fbd.SelectedPath = txtFolderPath.Text; // set default path
-
-                DialogResult result = fbd.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                {
-                    txtFolderPath.Text = fbd.SelectedPath;
-                }
-            }
+            return dlSolutions.SelectedItem == null ? null : (string)((ComboboxItem)dlSolutions.SelectedItem).Value;
         }
 
+        private void SendWindowsNotification(string message, params object[] args)
+        {
+            // BC: this doesn't work since we have no AppUserModelId on a plugin
+            //var toastXml = ToastNotificationManager.GetTemplateContent(
+            //    ToastTemplateType.ToastText02);
+
+            //// Fill in the text elements
+            //var stringElements = toastXml.GetElementsByTagName("text");
+            //stringElements[0].AppendChild(toastXml.CreateTextNode("Xrm Webresource Auto - Updater"));
+            //stringElements[1].AppendChild(toastXml.CreateTextNode(string.Format(message, args)));
+
+            ////// Specify the absolute path to an image
+            ////String imagePath = "file:///" + image;
+            ////var imageElements = toastXml.GetElementsByTagName("image");
+            ////imageElements[0].Attributes.GetNamedItem("src").NodeValue = imagePath;
+
+            //// Create the toast and attach event listeners
+            //ToastNotification toast = new ToastNotification(toastXml);
+
+            ////var events = new ToastEvents();
+
+            ////toast.Activated += events.ToastActivated;
+            ////toast.Dismissed += events.ToastDismissed;
+            ////toast.Failed += events.ToastFailed;
+
+            //// Show the toast. Be sure to specify the AppUserModelId
+            //// on your application's shortcut!
+            //ToastNotificationManager.CreateToastNotifier(RepositoryName).Show(toast);
+        }
         #endregion Methods
 
     }

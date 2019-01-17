@@ -33,16 +33,18 @@
             this.viewImageList = new System.Windows.Forms.ImageList(this.components);
             this.pnlHeader = new System.Windows.Forms.Panel();
             this.gbSettings = new System.Windows.Forms.GroupBox();
-            this.dlSolutions = new System.Windows.Forms.ComboBox();
+            this.txtDelay = new System.Windows.Forms.NumericUpDown();
+            this.lblDelay = new System.Windows.Forms.Label();
             this.txtFilter = new System.Windows.Forms.TextBox();
             this.lblExtensionFilter = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.gbEnvironment = new System.Windows.Forms.GroupBox();
             this.btnBrowse = new System.Windows.Forms.Button();
             this.txtFolderPath = new System.Windows.Forms.TextBox();
             this.lblFolder = new System.Windows.Forms.Label();
             this.lbSourceValue = new System.Windows.Forms.Label();
             this.lblOrganisation = new System.Windows.Forms.Label();
+            this.dlSolutions = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.tsMain = new System.Windows.Forms.ToolStrip();
             this.tsbCloseThisTab = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -52,18 +54,18 @@
             this.donateInUSDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateInEURToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.donateInGBPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gbLog = new System.Windows.Forms.GroupBox();
+            this.gbRuntime = new System.Windows.Forms.GroupBox();
+            this.btnForceUpdate = new System.Windows.Forms.Button();
+            this.btnClearLog = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.pnlBody = new System.Windows.Forms.Panel();
-            this.lblDelay = new System.Windows.Forms.Label();
-            this.txtDelay = new System.Windows.Forms.NumericUpDown();
             this.pnlHeader.SuspendLayout();
             this.gbSettings.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).BeginInit();
             this.gbEnvironment.SuspendLayout();
             this.tsMain.SuspendLayout();
-            this.gbLog.SuspendLayout();
+            this.gbRuntime.SuspendLayout();
             this.pnlBody.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).BeginInit();
             this.SuspendLayout();
             // 
             // viewImageList
@@ -80,7 +82,7 @@
             this.pnlHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlHeader.Location = new System.Drawing.Point(0, 25);
             this.pnlHeader.Name = "pnlHeader";
-            this.pnlHeader.Size = new System.Drawing.Size(800, 104);
+            this.pnlHeader.Size = new System.Drawing.Size(800, 80);
             this.pnlHeader.TabIndex = 103;
             // 
             // gbSettings
@@ -88,25 +90,42 @@
             this.gbSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.gbSettings.Controls.Add(this.txtDelay);
             this.gbSettings.Controls.Add(this.lblDelay);
-            this.gbSettings.Controls.Add(this.dlSolutions);
             this.gbSettings.Controls.Add(this.txtFilter);
             this.gbSettings.Controls.Add(this.lblExtensionFilter);
-            this.gbSettings.Controls.Add(this.label1);
             this.gbSettings.Location = new System.Drawing.Point(516, 3);
             this.gbSettings.Name = "gbSettings";
-            this.gbSettings.Size = new System.Drawing.Size(281, 95);
+            this.gbSettings.Size = new System.Drawing.Size(281, 75);
             this.gbSettings.TabIndex = 102;
             this.gbSettings.TabStop = false;
             this.gbSettings.Text = "Settings";
             // 
-            // dlSolutions
+            // txtDelay
             // 
-            this.dlSolutions.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.dlSolutions.FormattingEnabled = true;
-            this.dlSolutions.Location = new System.Drawing.Point(104, 22);
-            this.dlSolutions.Name = "dlSolutions";
-            this.dlSolutions.Size = new System.Drawing.Size(171, 21);
-            this.dlSolutions.TabIndex = 106;
+            this.txtDelay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDelay.Location = new System.Drawing.Point(104, 23);
+            this.txtDelay.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.txtDelay.Name = "txtDelay";
+            this.txtDelay.Size = new System.Drawing.Size(171, 20);
+            this.txtDelay.TabIndex = 108;
+            this.txtDelay.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            // 
+            // lblDelay
+            // 
+            this.lblDelay.AutoSize = true;
+            this.lblDelay.Location = new System.Drawing.Point(6, 25);
+            this.lblDelay.Name = "lblDelay";
+            this.lblDelay.Size = new System.Drawing.Size(91, 13);
+            this.lblDelay.TabIndex = 107;
+            this.lblDelay.Text = "Upload delay (ms)";
             // 
             // txtFilter
             // 
@@ -126,15 +145,6 @@
             this.lblExtensionFilter.TabIndex = 102;
             this.lblExtensionFilter.Text = "Extension filter";
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 25);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 13);
-            this.label1.TabIndex = 101;
-            this.label1.Text = "Add to solution";
-            // 
             // gbEnvironment
             // 
             this.gbEnvironment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -146,7 +156,7 @@
             this.gbEnvironment.Controls.Add(this.lblOrganisation);
             this.gbEnvironment.Location = new System.Drawing.Point(3, 4);
             this.gbEnvironment.Name = "gbEnvironment";
-            this.gbEnvironment.Size = new System.Drawing.Size(507, 94);
+            this.gbEnvironment.Size = new System.Drawing.Size(507, 74);
             this.gbEnvironment.TabIndex = 101;
             this.gbEnvironment.TabStop = false;
             this.gbEnvironment.Text = "Environment";
@@ -201,6 +211,26 @@
             this.lblOrganisation.Size = new System.Drawing.Size(66, 13);
             this.lblOrganisation.TabIndex = 100;
             this.lblOrganisation.Text = "Organisation";
+            // 
+            // dlSolutions
+            // 
+            this.dlSolutions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.dlSolutions.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.dlSolutions.FormattingEnabled = true;
+            this.dlSolutions.Location = new System.Drawing.Point(617, 21);
+            this.dlSolutions.Name = "dlSolutions";
+            this.dlSolutions.Size = new System.Drawing.Size(171, 21);
+            this.dlSolutions.TabIndex = 106;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(519, 24);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 13);
+            this.label1.TabIndex = 101;
+            this.label1.Text = "Add to solution";
             // 
             // tsMain
             // 
@@ -279,66 +309,62 @@
             this.donateInGBPToolStripMenuItem.Text = "Donate in GBP";
             this.donateInGBPToolStripMenuItem.Click += new System.EventHandler(this.donateInGBPToolStripMenuItem_Click);
             // 
-            // gbLog
+            // gbRuntime
             // 
-            this.gbLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.gbRuntime.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.gbLog.Controls.Add(this.txtLog);
-            this.gbLog.Location = new System.Drawing.Point(3, 6);
-            this.gbLog.Name = "gbLog";
-            this.gbLog.Size = new System.Drawing.Size(794, 300);
-            this.gbLog.TabIndex = 102;
-            this.gbLog.TabStop = false;
-            this.gbLog.Text = "Log";
+            this.gbRuntime.Controls.Add(this.btnForceUpdate);
+            this.gbRuntime.Controls.Add(this.btnClearLog);
+            this.gbRuntime.Controls.Add(this.dlSolutions);
+            this.gbRuntime.Controls.Add(this.txtLog);
+            this.gbRuntime.Controls.Add(this.label1);
+            this.gbRuntime.Location = new System.Drawing.Point(3, 6);
+            this.gbRuntime.Name = "gbRuntime";
+            this.gbRuntime.Size = new System.Drawing.Size(794, 324);
+            this.gbRuntime.TabIndex = 102;
+            this.gbRuntime.TabStop = false;
+            this.gbRuntime.Text = "Runtime";
+            // 
+            // btnForceUpdate
+            // 
+            this.btnForceUpdate.Location = new System.Drawing.Point(95, 19);
+            this.btnForceUpdate.Name = "btnForceUpdate";
+            this.btnForceUpdate.Size = new System.Drawing.Size(80, 23);
+            this.btnForceUpdate.TabIndex = 105;
+            this.btnForceUpdate.Text = "Force update";
+            this.btnForceUpdate.UseVisualStyleBackColor = true;
+            this.btnForceUpdate.Click += new System.EventHandler(this.btnForceUpdate_Click);
+            // 
+            // btnClearLog
+            // 
+            this.btnClearLog.Location = new System.Drawing.Point(9, 19);
+            this.btnClearLog.Name = "btnClearLog";
+            this.btnClearLog.Size = new System.Drawing.Size(80, 23);
+            this.btnClearLog.TabIndex = 104;
+            this.btnClearLog.Text = "Clear log";
+            this.btnClearLog.UseVisualStyleBackColor = true;
+            this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
             // 
             // txtLog
             // 
             this.txtLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLog.Location = new System.Drawing.Point(9, 19);
+            this.txtLog.Location = new System.Drawing.Point(9, 48);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
-            this.txtLog.Size = new System.Drawing.Size(779, 275);
+            this.txtLog.Size = new System.Drawing.Size(779, 270);
             this.txtLog.TabIndex = 0;
             // 
             // pnlBody
             // 
-            this.pnlBody.Controls.Add(this.gbLog);
+            this.pnlBody.Controls.Add(this.gbRuntime);
             this.pnlBody.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlBody.Location = new System.Drawing.Point(0, 129);
+            this.pnlBody.Location = new System.Drawing.Point(0, 105);
             this.pnlBody.Name = "pnlBody";
-            this.pnlBody.Size = new System.Drawing.Size(800, 309);
+            this.pnlBody.Size = new System.Drawing.Size(800, 333);
             this.pnlBody.TabIndex = 104;
-            // 
-            // lblDelay
-            // 
-            this.lblDelay.AutoSize = true;
-            this.lblDelay.Location = new System.Drawing.Point(6, 70);
-            this.lblDelay.Name = "lblDelay";
-            this.lblDelay.Size = new System.Drawing.Size(91, 13);
-            this.lblDelay.TabIndex = 107;
-            this.lblDelay.Text = "Upload delay (ms)";
-            // 
-            // txtDelay
-            // 
-            this.txtDelay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDelay.Location = new System.Drawing.Point(104, 68);
-            this.txtDelay.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.txtDelay.Name = "txtDelay";
-            this.txtDelay.Size = new System.Drawing.Size(171, 20);
-            this.txtDelay.TabIndex = 108;
-            this.txtDelay.Value = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
             // 
             // AutoUpdater
             // 
@@ -353,14 +379,14 @@
             this.pnlHeader.ResumeLayout(false);
             this.gbSettings.ResumeLayout(false);
             this.gbSettings.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).EndInit();
             this.gbEnvironment.ResumeLayout(false);
             this.gbEnvironment.PerformLayout();
             this.tsMain.ResumeLayout(false);
             this.tsMain.PerformLayout();
-            this.gbLog.ResumeLayout(false);
-            this.gbLog.PerformLayout();
+            this.gbRuntime.ResumeLayout(false);
+            this.gbRuntime.PerformLayout();
             this.pnlBody.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.txtDelay)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -381,7 +407,7 @@
         private System.Windows.Forms.ToolStripMenuItem donateInUSDToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem donateInEURToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem donateInGBPToolStripMenuItem;
-        private System.Windows.Forms.GroupBox gbLog;
+        private System.Windows.Forms.GroupBox gbRuntime;
         private System.Windows.Forms.TextBox txtLog;
         private System.Windows.Forms.Panel pnlBody;
         private System.Windows.Forms.Label lblFolder;
@@ -393,5 +419,7 @@
         private System.Windows.Forms.ComboBox dlSolutions;
         private System.Windows.Forms.NumericUpDown txtDelay;
         private System.Windows.Forms.Label lblDelay;
+        private System.Windows.Forms.Button btnClearLog;
+        private System.Windows.Forms.Button btnForceUpdate;
     }
 }

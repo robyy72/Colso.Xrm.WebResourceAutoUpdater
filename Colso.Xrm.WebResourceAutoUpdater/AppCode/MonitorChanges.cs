@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Xrm.Sdk;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 {
@@ -13,7 +14,6 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
     {
         private string _folder;
         private HashSet<string> _allowedextensions;
-        private string _solutionuniquename;
         private IOrganizationService _service;
 
         private FileSystemWatcher _fsw;
@@ -22,13 +22,22 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
         private int _cacheTimeMilliseconds = 1000;
         static ManualResetEvent _quitEvent = new ManualResetEvent(false);
 
-        private List<Guid> _resourceIds = new List<Guid>();
         public event EventHandler OnMonitorMessage;
 
-        public void Start(IOrganizationService service, int cachetime, string folder, string solutionuniquename, string[] allowedextensions)
+        public delegate string GetSolutionUniqueName();
+        private GetSolutionUniqueName getSolutionUniqueName;
+        public delegate void ActionNotificationDelegate(string message, params object[] a);
+        private ActionNotificationDelegate actionNotification;
+
+        public MonitorChanges(ComboBox dlSolutions, GetSolutionUniqueName getSolutionName, ActionNotificationDelegate actionNotification)
+        {
+            this.getSolutionUniqueName = getSolutionName;
+            this.actionNotification = actionNotification;
+        }
+
+        public void Start(IOrganizationService service, int cachetime, string folder, string[] allowedextensions)
         {
             _cacheTimeMilliseconds = cachetime;
-            _solutionuniquename = solutionuniquename;
             _folder = folder;
             _service = service;
 
@@ -70,6 +79,51 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
             return _fsw != null && _fsw.EnableRaisingEvents;
         }
 
+        public void UpdateFiles(List<string> filenames)
+        {
+            // filter out extensions
+            filenames = filenames.Where(f => IsExtensionAllowed(f)).Distinct().ToList();
+
+            if (filenames.Count > 0)
+            {
+                var resourceIds = new List<Guid>();
+               try
+                {
+                    SetStatusMessage("Start upload of {0} file{1}", filenames.Count, filenames.Count == 1 ? string.Empty : "s");
+
+                    foreach (var f in filenames)
+                    {
+                        try
+                        {
+                            resourceIds.Add(_service.Upload(_folder, f));
+                        }
+                        catch (Exception ex)
+                        {
+                            SetStatusMessage("FAILED! {0}", ex);
+                        }
+                    }
+                    var uids = resourceIds.Distinct().ToArray();
+                    actionNotification("{0} files uploaded", uids.Length);
+
+                    SetStatusMessage("Start publish");
+                    _service.Publish(uids);
+                    actionNotification("Publish completed");
+
+                    // Add to solution?!
+                    var selectedsolution = this.getSolutionUniqueName();
+
+                    if (!string.IsNullOrEmpty(selectedsolution))
+                        _service.AddToSolution(selectedsolution, uids);
+
+                    SetStatusMessage("Done!");
+                }
+                catch (Exception ex)
+                {
+                    SetStatusMessage("ERROR! {0}", ex);
+                }
+            }
+        }
+
         private void OnError(object source, ErrorEventArgs e)
         {
             SetStatusMessage("Error: {0}", e.GetException().Message);
@@ -87,44 +141,7 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
             // Get all files in the cache
             var filenames = updates.Where(p => !directories.Any(p2 => p2 == p)).ToList();
             filenames.AddRange(directories.SelectMany(d => Directory.GetFiles(d)));
-            filenames = filenames.Where(f => IsExtensionAllowed(f)).Distinct().ToList();
-
-            if (filenames.Count > 0)
-            {
-
-                try
-                {
-                    SetStatusMessage("Start upload of {0} file{1}", filenames.Count, filenames.Count == 1 ? string.Empty : "s");
-                    foreach (var f in filenames)
-                    {
-                        try
-                        {
-                            _resourceIds.Add(_service.Upload(_folder, f));
-                        }
-                        catch (Exception ex)
-                        {
-                            SetStatusMessage("FAILED! {0}", ex);
-                        }
-                    }
-
-                    var uids = _resourceIds.Distinct().ToArray();
-                    _resourceIds.Clear();
-                    SetStatusMessage("Start publish");
-                    _service.Publish(uids);
-
-                    // Add to solution?!
-                    if (!string.IsNullOrEmpty(_solutionuniquename))
-                    {
-                        _service.AddToSolution(_solutionuniquename, uids);
-                    }
-
-                    SetStatusMessage("Done!");
-                }
-                catch (Exception ex)
-                {
-                    SetStatusMessage("ERROR! {0}", ex);
-                }
-            }
+            UpdateFiles(filenames);
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
