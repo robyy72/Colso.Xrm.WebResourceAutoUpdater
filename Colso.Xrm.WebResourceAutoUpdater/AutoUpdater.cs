@@ -239,26 +239,15 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             }
             else
             {
-                if (!CheckConnection())
+                if (!CheckConnection() || !CheckSettings())
                     return;
-
-                if (string.IsNullOrEmpty(txtFolderPath.Text))
-                {
-                    MessageBox.Show("You must select a folder to monitor!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                if (!Directory.Exists(txtFolderPath.Text))
-                {
-                    MessageBox.Show("The selected folder doesn't exist!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
 
                 var worker = new BackgroundWorker { WorkerReportsProgress = true };
                 worker.DoWork += (s, args) =>
                 {
                     ManageWorkingState(true);
-                    monitor.Start(this.Service, (int)txtDelay.Value, txtFolderPath.Text, txtFilter.Text.Split(',',';'));
+                    monitor.UpdateSettings(txtFolderPath.Text, txtFilter.Text.Split(',', ';'));
+                    monitor.Start(this.Service, (int)txtDelay.Value);
                 };
 
                 worker.RunWorkerAsync();
@@ -267,10 +256,11 @@ namespace Colso.Xrm.WebResourceAutoUpdater
 
         private void ForceUpdate()
         {
-            var dir = txtFolderPath.Text;
-            var allfiles = Directory.GetFiles(dir, "*.*", SearchOption.AllDirectories);
+            if (!CheckConnection() || !CheckSettings())
+                return;
 
-            monitor.UpdateFiles(allfiles.ToList<string>());
+            monitor.UpdateSettings(txtFolderPath.Text, txtFilter.Text.Split(',', ';'));
+            monitor.UpdateFolder();
         }
 
         private void SetConnectionLabel(string name)
@@ -309,6 +299,23 @@ namespace Colso.Xrm.WebResourceAutoUpdater
             {
                 return true;
             }
+        }
+
+        private bool CheckSettings()
+        {
+            if (string.IsNullOrEmpty(txtFolderPath.Text))
+            {
+                MessageBox.Show("You must select a folder to monitor!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (!Directory.Exists(txtFolderPath.Text))
+            {
+                MessageBox.Show("The selected folder doesn't exist!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
         }
 
         private void UpdateLog(object sender, EventArgs e)

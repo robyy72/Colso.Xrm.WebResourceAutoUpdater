@@ -35,18 +35,25 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
             this.actionNotification = actionNotification;
         }
 
-        public void Start(IOrganizationService service, int cachetime, string folder, string[] allowedextensions)
+        public void UpdateSettings(string folder, string[] allowedextensions)
         {
-            _cacheTimeMilliseconds = cachetime;
             _folder = folder;
-            _service = service;
-
+            _allowedextensions = new HashSet<string>();
             if (allowedextensions != null && allowedextensions.Length > 0)
             {
-                _allowedextensions = new HashSet<string>();
-                foreach (var ext in allowedextensions)
-                    _allowedextensions.Add(ext.TrimStart('.', '*').ToLower());
+                foreach (var extension in allowedextensions)
+                {
+                    var ext = extension.TrimStart('.', '*').ToLower();
+                    if (!string.IsNullOrEmpty(ext)) _allowedextensions.Add(ext);
+                }
             }
+        }
+
+        public void Start(IOrganizationService service, int cachetime)
+        {
+            _cacheTimeMilliseconds = cachetime;
+            _service = service;
+
 
             _fsw = new FileSystemWatcher(_folder)
             {
@@ -79,7 +86,13 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
             return _fsw != null && _fsw.EnableRaisingEvents;
         }
 
-        public void UpdateFiles(List<string> filenames)
+        public void UpdateFolder()
+        {
+            var allfiles = Directory.GetFiles(_folder, "*.*", SearchOption.AllDirectories);
+            UpdateFiles(allfiles.ToList<string>());
+        }
+
+        private void UpdateFiles(List<string> filenames)
         {
             // filter out extensions
             filenames = filenames.Where(f => IsExtensionAllowed(f)).Distinct().ToList();
@@ -113,7 +126,11 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
                     var selectedsolution = this.getSolutionUniqueName();
 
                     if (!string.IsNullOrEmpty(selectedsolution))
+                    {
+                        SetStatusMessage("Adding the files to '{0}'", selectedsolution);
                         _service.AddToSolution(selectedsolution, uids);
+                        actionNotification("Adding to solution completed");
+                    }
 
                     SetStatusMessage("Done!");
                 }
