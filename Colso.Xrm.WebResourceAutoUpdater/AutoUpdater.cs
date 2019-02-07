@@ -137,6 +137,11 @@ namespace Colso.Xrm.WebResourceAutoUpdater
 
         #region Form events
 
+        public new void Load()
+        {
+            /* DO NOTHING (required by RaiseRequestConnectionEvent) */
+        }
+
         protected override void ConnectionDetailsUpdated(NotifyCollectionChangedEventArgs e)
         {
             // This is not working?! -> use AutoUpdater_ConnectionUpdated
