@@ -57,7 +57,9 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 
             _fsw = new FileSystemWatcher(_folder)
             {
-                NotifyFilter = NotifyFilters.LastWrite,
+                // BC 07/02/19: also include new files
+                //NotifyFilter = NotifyFilters.LastWrite,
+                NotifyFilter = (NotifyFilters.LastWrite | NotifyFilters.CreationTime),
                 IncludeSubdirectories = true
             };
 
@@ -152,6 +154,7 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 
             var updates = ((HashSet<string>)args.CacheItem.Value).ToArray();
             var directories = updates
+                .Where(u => File.Exists(u))
                 .Where(u => ((File.GetAttributes(u) & FileAttributes.Directory) == FileAttributes.Directory))
                 .ToArray();
 
@@ -163,30 +166,35 @@ namespace Colso.Xrm.WebResourceAutoUpdater.AppCode
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            var attr = File.GetAttributes(e.FullPath);
-            var isdirectory = ((attr & FileAttributes.Directory) == FileAttributes.Directory);
-
-            if (isdirectory || IsExtensionAllowed(e.FullPath))
+            if (File.Exists(e.FullPath))
             {
-                HashSet<string> currentupdates = (HashSet<string>)_memCache.Get("fileupdates");
-                if (currentupdates == null) currentupdates = new HashSet<string>();
+                var attr = File.GetAttributes(e.FullPath);
+                var isdirectory = ((attr & FileAttributes.Directory) == FileAttributes.Directory);
 
-                // Only add if it is not there already (swallow others)
-                if (!currentupdates.Contains(e.FullPath))
+                if (isdirectory || IsExtensionAllowed(e.FullPath))
                 {
-                    SetStatusMessage("Changed {1}: {0}", e.Name, isdirectory ? "directory": "file");
-                    currentupdates.Add(e.FullPath);
-                }
+                    HashSet<string> currentupdates = (HashSet<string>)_memCache.Get("fileupdates");
+                    if (currentupdates == null) currentupdates = new HashSet<string>();
 
-                _cacheItemPolicy.AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(_cacheTimeMilliseconds);
-                _memCache.AddOrGetExisting("fileupdates", currentupdates, _cacheItemPolicy);
+                    // Only add if it is not there already (swallow others)
+                    if (!currentupdates.Contains(e.FullPath))
+                    {
+                        SetStatusMessage("Changed {1}: {0}", e.Name, isdirectory ? "directory" : "file");
+                        currentupdates.Add(e.FullPath);
+                    }
+
+                    _cacheItemPolicy.AbsoluteExpiration = DateTimeOffset.Now.AddMilliseconds(_cacheTimeMilliseconds);
+                    _memCache.AddOrGetExisting("fileupdates", currentupdates, _cacheItemPolicy);
+                }
             }
         }
 
         private bool IsExtensionAllowed(string file)
         {
-            return (_allowedextensions == null || _allowedextensions.Count == 0 ||
-                _allowedextensions.Contains(Path.GetExtension(file).TrimStart('.').ToLower()));
+            var ext = Path.GetExtension(file).TrimStart('.').ToLower();
+
+            return ((_allowedextensions == null || _allowedextensions.Count == 0 || _allowedextensions.Contains(ext)) 
+                && !ext.EndsWith("~"));
         }
 
         private void SetStatusMessage(string format, params object[] args)
